@@ -82,6 +82,7 @@ var rootCmd = &cobra.Command{
 			fmt.Println("Error deleting old certificate bundle:", err)
 			return
 		}
+		fmt.Println("Deleted old certificate bundle:", current_bundle.Cert)
 
 		fmt.Println("Done")
 	},
