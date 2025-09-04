@@ -141,8 +141,8 @@ func (c *Client) DeleteKey(keyHandle string) error {
 	return nil
 }
 
-func Connect(params client.Parameters) Client {
-	return Client{
+func NewClient(params client.Parameters) *Client {
+	return &Client{
 		wsman: wsman.NewMessages(params),
 	}
 }

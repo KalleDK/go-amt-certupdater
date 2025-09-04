@@ -1,6 +1,6 @@
 target: amt.server.local
 username: admin
 password: secretpassword
-usedigest: true
-usetls: true
-selfsignedallowed: true
+use_digest: true
+use_tls: true
+self_signed_allowed: true
