@@ -51,10 +51,15 @@ func (cm *CertManager) Refresh() error {
 }
 
 func (cm *CertManager) GetCurrentBundleHandle() (BundleHandles, error) {
+	if cm.cert_to_key == nil {
+		cm.Refresh()
+	}
+
 	current_cert_handle, err := cm.client.GetCurrentCertHandle()
 	if err != nil {
 		return BundleHandles{}, err
 	}
+
 	current_key_handle, ok := cm.cert_to_key[current_cert_handle]
 	if !ok {
 		return BundleHandles{}, fmt.Errorf("current cert handle not found")
