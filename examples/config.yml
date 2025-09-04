@@ -1,6 +1,6 @@
-target: amt.local
+target: amt.server.local
 username: admin
 password: secretpassword
 usedigest: true
+usetls: true
 selfsignedallowed: true
-logamtmessages: true
