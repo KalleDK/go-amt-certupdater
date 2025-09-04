@@ -14,7 +14,7 @@ jobs:
         with:
            go-version-file: 'go.mod'
       - name: Build packages
-        uses: goreleaser/goreleaser-action@v4
+        uses: goreleaser/goreleaser-action@v6
         with:
           distribution: goreleaser
           version: latest
@@ -22,7 +22,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: 'acmednsproxy-archive'
+          name: 'amt-certupdater-archive'
           path: |
             ./dist/*.zip
             ./dist/*.tar.gz
