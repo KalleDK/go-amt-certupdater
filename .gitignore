@@ -1,2 +1,5 @@
-config.yml
-go-amt-certupdater
+/config.yml
+/go-amt-certupdater
+/amt-certupdater
+# Added by goreleaser init:
+/dist

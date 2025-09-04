@@ -6,7 +6,7 @@ package cmd
 import (
 	"os"
 
-	certupdater "github.com/KalleDK/go-amt-certupdater/pkg"
+	certupdater "github.com/KalleDK/go-amt-certupdater/certupdater"
 	"github.com/spf13/cobra"
 )
 

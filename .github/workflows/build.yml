@@ -1,0 +1,31 @@
+on:
+  push:
+    branches:
+    - main
+
+name: Make Snapshot
+jobs:
+  gorelease:
+    name: Build Binary
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v4
+        with:
+           go-version-file: 'go.mod'
+      - name: Build packages
+        uses: goreleaser/goreleaser-action@v4
+        with:
+          distribution: goreleaser
+          version: latest
+          args: release --clean --snapshot
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: 'acmednsproxy-archive'
+          path: |
+            ./dist/*.zip
+            ./dist/*.tar.gz
+            ./dist/*.apk
+            ./dist/*.deb
+          if-no-files-found: error

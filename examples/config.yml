@@ -1,0 +1,6 @@
+target: amt.local
+username: admin
+password: secretpassword
+usedigest: true
+selfsignedallowed: true
+logamtmessages: true
