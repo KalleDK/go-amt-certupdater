@@ -4,8 +4,6 @@ import (
 	"crypto/rsa"
 	"crypto/x509"
 	"fmt"
-
-	"github.com/device-management-toolkit/go-wsman-messages/v2/pkg/wsman/client"
 )
 
 type CertManager struct {
@@ -15,9 +13,9 @@ type CertManager struct {
 	keys        map[string]*rsa.PublicKey
 }
 
-func NewCertManager(params client.Parameters) CertManager {
+func NewCertManager(params Config) CertManager {
 	return CertManager{
-		client: NewClient(params),
+		client: NewClient(params.AsClientParameters()),
 	}
 }
 

@@ -9,82 +9,48 @@ import (
 
 	certupdater "github.com/KalleDK/go-amt-certupdater/certupdater"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
-func loadLegoBundle() (certupdater.CertBundle, error) {
-	private_key_path := os.Getenv("LEGO_CERT_KEY_PATH")
-	cert_path := os.Getenv("LEGO_CERT_PATH")
+func loadConfig(v *viper.Viper, cfg *certupdater.Config) error {
+	v.SetConfigFile(viper.GetString("config"))
 
-	fmt.Println("Using private key path:", private_key_path)
-	fmt.Println("Using certificate path:", cert_path)
+	if err := v.ReadInConfig(); err != nil { // Handle errors reading the config file
+		return err
+	}
+	if err := v.Unmarshal(&cfg); err != nil {
+		return err
+	}
+	fmt.Printf("Using config: %+v\n", *cfg)
+	return nil
+}
 
-	bundle, err := certupdater.LoadBundle(cert_path, private_key_path)
-	if err != nil {
-		return certupdater.CertBundle{}, err
+func loadConfigGlobal(cfg *certupdater.Config) error {
+
+	viper.SetConfigFile(viper.GetString("config"))
+
+	if err := viper.ReadInConfig(); err != nil { // Handle errors reading the config file
+		return err
+	}
+	if err := viper.Unmarshal(&cfg); err != nil {
+		return err
 	}
 
-	return bundle, nil
+	return nil
 }
+
+var cfg certupdater.Config
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "go-amt-certupdater",
 	Short: "Renew cert on amt devices using certs from lego",
 	Long:  ``,
-
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("Starting")
-
-		config, err := certupdater.LoadConfig(cfgFile)
-		if err != nil {
-			fmt.Println("Error loading config:", err)
-			return
+	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+		if err := loadConfigGlobal(&cfg); err != nil {
+			return err
 		}
-
-		bundle, err := loadLegoBundle()
-		if err != nil {
-			fmt.Println("Error loading Lego bundle:", err)
-			return
-		}
-		fmt.Println("Loaded certificate for:", bundle.Cert.Subject.CommonName)
-
-		mgr := certupdater.NewCertManager(config)
-		defer mgr.Close()
-
-		current_bundle, err := mgr.GetCurrentBundleHandle()
-		if err != nil {
-			fmt.Println("Error getting current TLS handles:", err)
-			return
-		}
-		fmt.Println("Current certificate handle:", current_bundle.Cert)
-		fmt.Println("Current key handle:", current_bundle.Key)
-
-		new_bundle, err := mgr.UploadBundle(bundle)
-		if err != nil {
-			fmt.Println("Error uploading new certificate bundle:", err)
-			return
-		}
-		fmt.Println("Uploaded new certificate handle:", new_bundle.Cert)
-		fmt.Println("Uploaded new key handle:", new_bundle.Key)
-
-		if new_bundle.Cert == current_bundle.Cert {
-			fmt.Println("New certificate is the same as current certificate.")
-			return
-		}
-
-		if err := mgr.SetTLSCertificate(new_bundle); err != nil {
-			fmt.Println("Error setting TLS certificate:", err)
-			return
-		}
-		fmt.Println("Set new TLS certificate to:", new_bundle.Cert)
-
-		if err := mgr.DeleteBundle(current_bundle); err != nil {
-			fmt.Println("Error deleting old certificate bundle:", err)
-			return
-		}
-		fmt.Println("Deleted old certificate bundle:", current_bundle.Cert)
-
-		fmt.Println("Done")
+		return nil
 	},
 }
 
@@ -97,8 +63,40 @@ func Execute() {
 	}
 }
 
-var cfgFile string
+type Settings struct {
+	Config string
+}
+
+const PREFIX = "AMT"
+
+func withPrefix(s string) string {
+	return fmt.Sprintf("%s_%s", PREFIX, s)
+}
+
+func addConfigFlags(cmd *cobra.Command, v *viper.Viper) {
+	v.SetEnvPrefix(PREFIX)
+	v.AutomaticEnv()
+
+	cmd.Flags().Bool("help", false, "help for "+cmd.Name())
+	cmd.Flags().StringP("host", "h", "", "host to connect to")
+	v.BindPFlag("host", cmd.Flags().Lookup("host"))
+	cmd.Flags().StringP("username", "u", "", "username to authenticate with")
+	v.BindPFlag("username", cmd.Flags().Lookup("username"))
+	cmd.Flags().StringP("password", "p", "", "password to authenticate with")
+	v.BindPFlag("password", cmd.Flags().Lookup("password"))
+	cmd.Flags().String("cert", "", "path to certificate file")
+	v.BindPFlag("cert_path", cmd.Flags().Lookup("cert"))
+	v.BindEnv("cert_path", withPrefix("CERT"), "LEGO_CERT_PATH")
+	cmd.Flags().String("key", "", "path to private key file")
+	v.BindPFlag("key_path", cmd.Flags().Lookup("key"))
+	v.BindEnv("key_path", withPrefix("KEY"), "LEGO_CERT_KEY_PATH")
+
+}
 
 func init() {
-	rootCmd.PersistentFlags().StringVarP(&cfgFile, "config", "c", "config.yml", "config file")
+	viper.SetEnvPrefix("AMT")
+	viper.AutomaticEnv()
+	rootCmd.PersistentFlags().StringP("config", "c", "config.yml", "config file")
+	viper.BindPFlag("config", rootCmd.PersistentFlags().Lookup("config"))
+
 }

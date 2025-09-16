@@ -4,6 +4,7 @@ import (
 	"crypto/rsa"
 	"crypto/x509"
 	"encoding/pem"
+	"fmt"
 	"os"
 )
 
@@ -46,6 +47,9 @@ func loadCert(filename string) (*x509.Certificate, error) {
 }
 
 func LoadBundle(cert_path, key_path string) (CertBundle, error) {
+	fmt.Println("Using private key path:", key_path)
+	fmt.Println("Using certificate path:", cert_path)
+
 	cert, err := loadCert(cert_path)
 	if err != nil {
 		return CertBundle{}, err

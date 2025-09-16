@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema",
+  "title": "Generated schema for AMTCertupdater Config",
+  "type": "object",
+  "properties": {
+    "host": {
+      "type": "string",
+      "pattern": "^[a-zA-Z0-9.-]+$"
+    },
+    "username": {
+      "type": "string"
+    },
+    "password": {
+      "type": "string"
+    },
+    "use_digest": {
+      "type": "boolean"
+    },
+    "use_tls": {
+      "type": "boolean"
+    },
+    "self_signed_allowed": {
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "host",
+    "username",
+    "password",
+    "use_digest",
+    "use_tls"
+  ]
+}

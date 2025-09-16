@@ -1,4 +1,4 @@
-target: amt.server.local
+host: amt.server.local
 username: admin
 password: secretpassword
 use_digest: true

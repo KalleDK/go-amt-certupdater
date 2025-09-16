@@ -3,3 +3,4 @@
 /amt-certupdater
 # Added by goreleaser init:
 /dist
+/tmp
