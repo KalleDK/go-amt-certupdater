@@ -36,7 +36,7 @@ jobs:
             ./dist/*.deb
           if-no-files-found: error
   upload-to-repo:
-    name: Upload Apk
+    name: Upload to repository
     needs: build
     runs-on: ubuntu-latest
     steps:
