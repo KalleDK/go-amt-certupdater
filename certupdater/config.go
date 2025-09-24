@@ -11,15 +11,15 @@ type Config struct {
 	Host                      string
 	Username                  string
 	Password                  string
-	UseDigest                 bool   `yaml:"use_digest,omitempty" mapstructure:"use_digest"`
-	UseTLS                    bool   `yaml:"use_tls,omitempty" mapstructure:"use_tls"`
-	SelfSignedAllowed         bool   `yaml:"self_signed_allowed,omitempty" mapstructure:"self_signed_allowed"`
-	LogAMTMessages            bool   `yaml:"log_amt_messages,omitempty" mapstructure:"log_amt_messages"`
-	IsRedirection             bool   `yaml:"is_redirection,omitempty" mapstructure:"is_redirection"`
-	PinnedCert                string `yaml:"pinned_cert,omitempty" mapstructure:"pinned_cert"`
-	AllowInsecureCipherSuites bool   `yaml:"allow_insecure_cipher_suites,omitempty" mapstructure:"allow_insecure_cipher_suites"`
-	CertPath                  string `yaml:"cert_path,omitempty" mapstructure:"cert_path"`
-	KeyPath                   string `yaml:"key_path,omitempty" mapstructure:"key_path"`
+	UseDigest                 bool   `yaml:"use_digest" mapstructure:"use_digest"`
+	UseTLS                    bool   `yaml:"use_tls" mapstructure:"use_tls"`
+	SelfSignedAllowed         bool   `yaml:"self_signed_allowed" mapstructure:"self_signed_allowed"`
+	LogAMTMessages            bool   `yaml:"log_amt_messages" mapstructure:"log_amt_messages"`
+	IsRedirection             bool   `yaml:"is_redirection" mapstructure:"is_redirection"`
+	PinnedCert                string `yaml:"pinned_cert" mapstructure:"pinned_cert"`
+	AllowInsecureCipherSuites bool   `yaml:"allow_insecure_cipher_suites" mapstructure:"allow_insecure_cipher_suites"`
+	CertPath                  string `yaml:"cert_path" mapstructure:"cert_path"`
+	KeyPath                   string `yaml:"key_path" mapstructure:"key_path"`
 }
 
 func (c *Config) AsClientParameters() client.Parameters {

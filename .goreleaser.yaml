@@ -25,6 +25,7 @@ builds:
       - freebsd
     goarch:
       - amd64
+      - "386"
     flags:
       - -trimpath
     ldflags:
@@ -55,9 +56,9 @@ checksum:
   name_template: "checksums.txt"
 
 nfpms:
-  - id: tool
+  - id: tool-deb
     package_name: amt-certupdater
-    file_name_template: "{{ .ConventionalFileName }}"
+    file_name_template: '{{ .ConventionalFileName }}'
     maintainer: Kalle M. Aagaard <git@k-moeller.dk>
     license: MIT
     homepage: https://github.com/KalleDK/go-amt-certupdater
@@ -68,6 +69,18 @@ nfpms:
       - tool
     formats:
       - deb
+  - id: tool-apk
+    package_name: amt-certupdater
+    file_name_template: '{{ .ConventionalFileName }}'
+    maintainer: Kalle M. Aagaard <git@k-moeller.dk>
+    license: MIT
+    homepage: https://github.com/KalleDK/go-amt-certupdater
+    contents:
+      - src: ./examples/*
+        dst: /usr/share/doc/{{ .ProjectName }}/examples/
+    ids:
+      - tool
+    formats:
       - apk
 
 changelog:
