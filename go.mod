@@ -4,7 +4,7 @@ go 1.25.0
 
 require (
 	github.com/device-management-toolkit/go-wsman-messages/v2 v2.32.1
-	github.com/spf13/cobra v1.10.1
+	github.com/spf13/cobra v1.10.2
 	github.com/spf13/viper v1.21.0
 	gopkg.in/yaml.v3 v3.0.1
 )
