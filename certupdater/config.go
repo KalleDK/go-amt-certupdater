@@ -7,6 +7,8 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+// Config holds all settings required to connect to an AMT device and to
+// locate the TLS certificate bundle that should be pushed to it.
 type Config struct {
 	Host                      string
 	Username                  string
@@ -22,6 +24,8 @@ type Config struct {
 	KeyPath                   string `yaml:"key_path" mapstructure:"key_path"`
 }
 
+// AsClientParameters converts the connection-related fields of c into the
+// client.Parameters type expected by the WS-Management library.
 func (c *Config) AsClientParameters() client.Parameters {
 	return client.Parameters{
 		Target:                    c.Host,
@@ -37,26 +41,25 @@ func (c *Config) AsClientParameters() client.Parameters {
 	}
 }
 
+// LoadBundle reads the certificate and private key files referenced by
+// CertPath and KeyPath and returns them as a CertBundle.
 func (c *Config) LoadBundle() (CertBundle, error) {
-
-	bundle, err := LoadBundle(c.CertPath, c.KeyPath)
-	if err != nil {
-		return CertBundle{}, err
-	}
-
-	return bundle, nil
+	return LoadBundle(c.CertPath, c.KeyPath)
 }
 
-func LoadConfig(path string) (client.Parameters, error) {
-	raw_config, err := os.ReadFile(path)
+// LoadConfig reads a YAML configuration file from path and returns the parsed
+// Config. Returns an error if the file cannot be read or does not contain
+// valid YAML.
+func LoadConfig(path string) (Config, error) {
+	rawConfig, err := os.ReadFile(path)
 	if err != nil {
-		return client.Parameters{}, err
+		return Config{}, err
 	}
 
 	var config Config
-	if err := yaml.Unmarshal(raw_config, &config); err != nil {
-		return client.Parameters{}, err
+	if err := yaml.Unmarshal(rawConfig, &config); err != nil {
+		return Config{}, err
 	}
 
-	return config.AsClientParameters(), nil
+	return config, nil
 }

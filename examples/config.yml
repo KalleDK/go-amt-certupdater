@@ -1,6 +1,12 @@
+# Connection settings
 host: amt.server.local
 username: admin
 password: secretpassword
 use_digest: true
 use_tls: true
 self_signed_allowed: true
+
+# Certificate bundle paths (can also be set via AMT_CERT / LEGO_CERT_PATH
+# and AMT_KEY / LEGO_CERT_KEY_PATH environment variables).
+cert_path: /etc/lego/certs/amt.server.local.crt
+key_path: /etc/lego/certs/amt.server.local.key

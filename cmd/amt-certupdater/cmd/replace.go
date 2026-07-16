@@ -1,6 +1,4 @@
-/*
-Copyright © 2025 NAME HERE <EMAIL ADDRESS>
-*/
+// Package cmd implements the replace sub-command.
 package cmd
 
 import (
@@ -14,10 +12,17 @@ import (
 
 var replaceViper = viper.New()
 
+// replaceCmd uploads a new certificate bundle to the AMT device, activates it
+// as the TLS credential, and removes the previously active bundle.
 var replaceCmd = &cobra.Command{
 	Use:   "replace",
-	Short: "",
-	Long:  ``,
+	Short: "Replace the active TLS certificate on the AMT device",
+	Long: `replace uploads a new certificate and private key to the AMT device,
+sets it as the active TLS credential, then deletes the old certificate bundle.
+
+The certificate and key paths can be supplied via the config file, the --cert
+and --key flags, or the AMT_CERT / AMT_KEY (and LEGO_CERT_PATH /
+LEGO_CERT_KEY_PATH) environment variables.`,
 
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var cfg certupdater.Config
@@ -27,48 +32,43 @@ var replaceCmd = &cobra.Command{
 
 		bundle, err := cfg.LoadBundle()
 		if err != nil {
-			fmt.Println("Error loading Lego bundle:", err)
-			return err
+			return fmt.Errorf("load certificate bundle: %w", err)
 		}
 		fmt.Println("Loaded certificate for:", bundle.Cert.Subject.CommonName)
 
 		mgr := certupdater.NewCertManager(cfg)
 		defer mgr.Close()
 
-		current_bundle, err := mgr.GetCurrentBundleHandle()
+		currentBundle, err := mgr.GetCurrentBundleHandle()
 		if err != nil {
-			fmt.Println("Error getting current TLS handles:", err)
-			return err
+			return fmt.Errorf("get current TLS handles: %w", err)
 		}
-		fmt.Println("Current certificate handle:", current_bundle.Cert)
-		fmt.Println("Current key handle:", current_bundle.Key)
+		fmt.Println("Current certificate handle:", currentBundle.Cert)
+		fmt.Println("Current key handle:", currentBundle.Key)
 
-		new_bundle, err := mgr.UploadBundle(bundle)
+		newBundle, err := mgr.UploadBundle(bundle)
 		if err != nil {
-			fmt.Println("Error uploading new certificate bundle:", err)
-			return err
+			return fmt.Errorf("upload new certificate bundle: %w", err)
 		}
-		fmt.Println("Uploaded new certificate handle:", new_bundle.Cert)
-		fmt.Println("Uploaded new key handle:", new_bundle.Key)
+		fmt.Println("Uploaded certificate handle:", newBundle.Cert)
+		fmt.Println("Uploaded key handle:", newBundle.Key)
 
-		if new_bundle.Cert == current_bundle.Cert {
-			fmt.Println("New certificate is the same as current certificate.")
+		if newBundle.Cert == currentBundle.Cert {
+			fmt.Println("Certificate is already up to date.")
 			return nil
 		}
 
-		if err := mgr.SetTLSCertificate(new_bundle); err != nil {
-			fmt.Println("Error setting TLS certificate:", err)
-			return err
+		if err := mgr.SetTLSCertificate(newBundle); err != nil {
+			return fmt.Errorf("set TLS certificate: %w", err)
 		}
-		fmt.Println("Set new TLS certificate to:", new_bundle.Cert)
+		fmt.Println("Activated new TLS certificate:", newBundle.Cert)
 
-		if err := mgr.DeleteBundle(current_bundle); err != nil {
-			fmt.Println("Error deleting old certificate bundle:", err)
-			return err
+		if err := mgr.DeleteBundle(currentBundle); err != nil {
+			return fmt.Errorf("delete old certificate bundle: %w", err)
 		}
-		fmt.Println("Deleted old certificate bundle:", current_bundle.Cert)
+		fmt.Println("Deleted old certificate bundle:", currentBundle.Cert)
 
-		fmt.Println("Done")
+		fmt.Println("Done.")
 		return nil
 	},
 }

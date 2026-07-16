@@ -1,10 +1,9 @@
-/*
-Copyright © 2025 NAME HERE <EMAIL ADDRESS>
-*/
+// Package cmd implements the command-line interface for amt-certupdater using
+// cobra and viper. Configuration can be supplied via a YAML file, environment
+// variables (prefix AMT_), or command-line flags.
 package cmd
 
 import (
-	"fmt"
 	"os"
 
 	certupdater "github.com/KalleDK/go-amt-certupdater/certupdater"
@@ -12,24 +11,10 @@ import (
 	"github.com/spf13/viper"
 )
 
-func loadConfig(v *viper.Viper, cfg *certupdater.Config) error {
-	v.SetConfigFile(viper.GetString("config"))
-
-	if err := v.ReadInConfig(); err != nil { // Handle errors reading the config file
-		return err
-	}
-	if err := v.Unmarshal(&cfg); err != nil {
-		return err
-	}
-	fmt.Printf("Using config: %+v\n", *cfg)
-	return nil
-}
-
 func loadConfigGlobal(cfg *certupdater.Config) error {
-
 	viper.SetConfigFile(viper.GetString("config"))
 
-	if err := viper.ReadInConfig(); err != nil { // Handle errors reading the config file
+	if err := viper.ReadInConfig(); err != nil {
 		return err
 	}
 	if err := viper.Unmarshal(&cfg); err != nil {
@@ -39,23 +24,34 @@ func loadConfigGlobal(cfg *certupdater.Config) error {
 	return nil
 }
 
+func loadConfig(v *viper.Viper, cfg *certupdater.Config) error {
+	v.SetConfigFile(viper.GetString("config"))
+
+	if err := v.ReadInConfig(); err != nil {
+		return err
+	}
+	if err := v.Unmarshal(cfg); err != nil {
+		return err
+	}
+	return nil
+}
+
 var cfg certupdater.Config
 
-// rootCmd represents the base command when called without any subcommands
+// rootCmd is the base command. Sub-commands (e.g. replace) are registered via
+// their own init functions.
 var rootCmd = &cobra.Command{
-	Use:   "go-amt-certupdater",
-	Short: "Renew cert on amt devices using certs from lego",
-	Long:  ``,
+	Use:   "amt-certupdater",
+	Short: "Renew TLS certificates on Intel AMT devices",
+	Long: `amt-certupdater replaces the TLS certificate on one or more Intel AMT
+devices. It is designed to be called from a certificate-renewal hook (e.g.
+lego's --run-hook) so that the AMT device always uses the latest certificate.`,
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
-		if err := loadConfigGlobal(&cfg); err != nil {
-			return err
-		}
-		return nil
+		return loadConfigGlobal(&cfg)
 	},
 }
 
-// Execute adds all child commands to the root command and sets flags appropriately.
-// This is called by main.main(). It only needs to happen once to the rootCmd.
+// Execute runs the root command and exits with a non-zero status on failure.
 func Execute() {
 	err := rootCmd.Execute()
 	if err != nil {
@@ -63,21 +59,19 @@ func Execute() {
 	}
 }
 
-type Settings struct {
-	Config string
-}
-
-const PREFIX = "AMT"
+const envPrefix = "AMT"
 
 func withPrefix(s string) string {
-	return fmt.Sprintf("%s_%s", PREFIX, s)
+	return envPrefix + "_" + s
 }
 
+// addConfigFlags registers the connection and bundle flags onto cmd and binds
+// them to the supplied viper instance so that per-sub-command configuration
+// works correctly alongside the global config file.
 func addConfigFlags(cmd *cobra.Command, v *viper.Viper) {
-	v.SetEnvPrefix(PREFIX)
+	v.SetEnvPrefix(envPrefix)
 	v.AutomaticEnv()
 
-	cmd.Flags().Bool("help", false, "help for "+cmd.Name())
 	cmd.Flags().StringP("host", "h", "", "host to connect to")
 	v.BindPFlag("host", cmd.Flags().Lookup("host"))
 	cmd.Flags().StringP("username", "u", "", "username to authenticate with")
@@ -90,13 +84,11 @@ func addConfigFlags(cmd *cobra.Command, v *viper.Viper) {
 	cmd.Flags().String("key", "", "path to private key file")
 	v.BindPFlag("key_path", cmd.Flags().Lookup("key"))
 	v.BindEnv("key_path", withPrefix("KEY"), "LEGO_CERT_KEY_PATH")
-
 }
 
 func init() {
-	viper.SetEnvPrefix("AMT")
+	viper.SetEnvPrefix(envPrefix)
 	viper.AutomaticEnv()
 	rootCmd.PersistentFlags().StringP("config", "c", "config.yml", "config file")
 	viper.BindPFlag("config", rootCmd.PersistentFlags().Lookup("config"))
-
 }

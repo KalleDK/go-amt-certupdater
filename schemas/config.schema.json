@@ -5,22 +5,52 @@
   "properties": {
     "host": {
       "type": "string",
+      "description": "Hostname or IP address of the AMT device.",
       "pattern": "^[a-zA-Z0-9.-]+$"
     },
     "username": {
-      "type": "string"
+      "type": "string",
+      "description": "AMT management username."
     },
     "password": {
-      "type": "string"
+      "type": "string",
+      "description": "AMT management password."
     },
     "use_digest": {
-      "type": "boolean"
+      "type": "boolean",
+      "description": "Use HTTP Digest authentication (required by most AMT devices)."
     },
     "use_tls": {
-      "type": "boolean"
+      "type": "boolean",
+      "description": "Connect to the AMT device over TLS."
     },
     "self_signed_allowed": {
-      "type": "boolean"
+      "type": "boolean",
+      "description": "Accept a self-signed TLS certificate from the AMT device."
+    },
+    "log_amt_messages": {
+      "type": "boolean",
+      "description": "Log raw WS-Management XML messages for debugging."
+    },
+    "is_redirection": {
+      "type": "boolean",
+      "description": "Use the AMT redirection port instead of the management port."
+    },
+    "pinned_cert": {
+      "type": "string",
+      "description": "PEM-encoded certificate to pin for the AMT TLS connection."
+    },
+    "allow_insecure_cipher_suites": {
+      "type": "boolean",
+      "description": "Allow weak or legacy TLS cipher suites."
+    },
+    "cert_path": {
+      "type": "string",
+      "description": "Path to the PEM-encoded certificate file to push to the AMT device."
+    },
+    "key_path": {
+      "type": "string",
+      "description": "Path to the PEM-encoded PKCS#1 RSA private key file to push to the AMT device."
     }
   },
   "required": [
