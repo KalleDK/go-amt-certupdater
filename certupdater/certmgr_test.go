@@ -18,7 +18,7 @@ func newLoadedManager(
 		loaded:      true,
 		certs:       certs,
 		keys:        keys,
-		cert_to_key: certToKey,
+		certToKey: certToKey,
 	}
 }
 
@@ -188,13 +188,13 @@ func TestDeleteCertificate_RemovesFromCacheAndMapping(t *testing.T) {
 
 	// Directly remove from cache as DeleteCertificate would (before client call).
 	delete(cm.certs, "cert-1")
-	delete(cm.cert_to_key, "cert-1")
+	delete(cm.certToKey, "cert-1")
 
 	if _, exists := cm.certs["cert-1"]; exists {
 		t.Error("cert still in cache after deletion")
 	}
-	if _, exists := cm.cert_to_key["cert-1"]; exists {
-		t.Error("cert_to_key entry still present after deletion")
+	if _, exists := cm.certToKey["cert-1"]; exists {
+		t.Error("certToKey entry still present after deletion")
 	}
 }
 
@@ -232,7 +232,7 @@ func TestNewCertManager_MapsInitialized(t *testing.T) {
 	if cm.keys == nil {
 		t.Error("keys map should be initialised, got nil")
 	}
-	if cm.cert_to_key == nil {
-		t.Error("cert_to_key map should be initialised, got nil")
+	if cm.certToKey == nil {
+		t.Error("certToKey map should be initialised, got nil")
 	}
 }

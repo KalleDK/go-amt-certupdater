@@ -31,7 +31,7 @@ go build -o amt-certupdater ./cmd/amt-certupdater
 
 ## Configuration
 
-Settings are resolved in priority order (highest first):
+Settings are resolved in the following priority order (1 = highest priority):
 
 1. Command-line flags
 2. Environment variables

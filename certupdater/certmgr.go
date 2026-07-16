@@ -17,7 +17,7 @@ import (
 type CertManager struct {
 	client      *Client
 	loaded      bool
-	cert_to_key map[string]string
+	certToKey map[string]string
 	certs       map[string]*x509.Certificate
 	keys        map[string]*rsa.PublicKey
 }
@@ -27,7 +27,7 @@ type CertManager struct {
 func NewCertManager(params Config) CertManager {
 	return CertManager{
 		client:      NewClient(params.AsClientParameters()),
-		cert_to_key: make(map[string]string),
+		certToKey: make(map[string]string),
 		certs:       make(map[string]*x509.Certificate),
 		keys:        make(map[string]*rsa.PublicKey),
 	}
@@ -63,11 +63,11 @@ func (cm *CertManager) Refresh() error {
 
 	cm.certs = certs
 	cm.keys = keys
-	// Mark loaded before building cert_to_key so that the GetKeyHandle call
+	// Mark loaded before building certToKey so that the GetKeyHandle call
 	// below does not trigger another Refresh and cause infinite recursion.
 	cm.loaded = true
 
-	cm.cert_to_key = make(map[string]string, len(cm.certs))
+	cm.certToKey = make(map[string]string, len(cm.certs))
 	for certHandle, cert := range cm.certs {
 		rsaKey, ok := cert.PublicKey.(*rsa.PublicKey)
 		if !ok {
@@ -79,7 +79,7 @@ func (cm *CertManager) Refresh() error {
 			return err
 		}
 		if ok {
-			cm.cert_to_key[certHandle] = keyHandle
+			cm.certToKey[certHandle] = keyHandle
 		}
 	}
 
@@ -98,7 +98,7 @@ func (cm *CertManager) GetCurrentBundleHandle() (BundleHandles, error) {
 		return BundleHandles{}, err
 	}
 
-	currentKeyHandle, ok := cm.cert_to_key[currentCertHandle]
+	currentKeyHandle, ok := cm.certToKey[currentCertHandle]
 	if !ok {
 		return BundleHandles{}, fmt.Errorf("no key handle found for current certificate handle %q", currentCertHandle)
 	}
@@ -169,7 +169,7 @@ func (cm *CertManager) IsKeyInUse(keyHandle string) (bool, error) {
 		return false, err
 	}
 
-	for _, kh := range cm.cert_to_key {
+	for _, kh := range cm.certToKey {
 		if kh == keyHandle {
 			return true, nil
 		}
@@ -202,7 +202,7 @@ func (cm *CertManager) UploadOrGetCertificate(cert *x509.Certificate) (string, e
 			return "", err
 		}
 		if ok {
-			cm.cert_to_key[certHandle] = keyHandle
+			cm.certToKey[certHandle] = keyHandle
 		}
 	}
 	return certHandle, nil
@@ -218,7 +218,7 @@ func (cm *CertManager) SetTLSCertificate(bundleHandle BundleHandles) error {
 // AMT device's certificate store and from the local cache.
 func (cm *CertManager) DeleteCertificate(certHandle string) error {
 	delete(cm.certs, certHandle)
-	delete(cm.cert_to_key, certHandle)
+	delete(cm.certToKey, certHandle)
 	return cm.client.DeleteCertificate(certHandle)
 }
 
